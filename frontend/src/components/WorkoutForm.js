@@ -1,16 +1,48 @@
-import { useState } from "react";
+import { useReducer } from "react";
 import useWorkoutContext from "../hooks/useWorkoutContext";
+
+const initialState = {
+  title: "",
+  load: "",
+  reps: "",
+  error: null,
+  emptyFields: [],
+};
+
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "error":
+      return {
+        ...state,
+        ...action,
+      };
+    case "success":
+      return {
+        title: "",
+        load: "",
+        reps: "",
+        error: null,
+        emptyFields: [],
+      };
+    case "setValue":
+      return {
+        ...state,
+        [action.field]: action.value,
+      };
+
+    default:
+      return state;
+  }
+};
 
 function WorkoutForm(props) {
   const { dispatch } = useWorkoutContext();
-  const [title, setTitle] = useState("");
-  const [load, setLoad] = useState("");
-  const [reps, setReps] = useState("");
-  const [error, setError] = useState(null);
+  
+  const [state, localDispatch] = useReducer(reducer, initialState);
+  const { title, load, reps, error, emptyFields } = state;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const workout = { title, load, reps };
 
     const response = await fetch("/api/workouts", {
@@ -24,13 +56,15 @@ function WorkoutForm(props) {
     const json = await response.json();
 
     if (!response.ok) {
-      setError(json.error);
+      localDispatch({
+        type: "error",
+        error: json.error,
+        emptyFields: json.emptyFields,
+      });
     }
     if (response.ok) {
-      setError(null);
-      setTitle("");
-      setLoad("");
-      setReps("");
+      localDispatch({ type: "success" });
+
       dispatch({ type: "CREATE_WORKOUT", payload: json });
     }
   };
@@ -41,21 +75,42 @@ function WorkoutForm(props) {
       <input
         type="text"
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={(e) => {
+          localDispatch({
+            type: "setValue",
+            field: "title",
+            value: e.target.value,
+          });
+        }}
+        className={emptyFields.includes("title") ? "error" : ""}
       />
 
       <label>Load (in Kg)</label>
       <input
         type="number"
         value={load}
-        onChange={(e) => setLoad(e.target.value)}
+        onChange={(e) => {
+          localDispatch({
+            type: "setValue",
+            field: "load",
+            value: e.target.value,
+          });
+        }}
+        className={emptyFields.includes("load") ? "error" : ""}
       />
 
       <label>Reps</label>
       <input
         type="number"
         value={reps}
-        onChange={(e) => setReps(e.target.value)}
+        onChange={(e) => {
+          localDispatch({
+            type: "setValue",
+            field: "reps",
+            value: e.target.value,
+          });
+        }}
+        className={emptyFields.includes("reps") ? "error" : ""}
       />
 
       <button>Add Workout</button>

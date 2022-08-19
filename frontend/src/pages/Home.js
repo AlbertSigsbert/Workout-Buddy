@@ -1,3 +1,4 @@
+import React from "react";
 import { useEffect } from "react";
 import WorkoutDetails from "../components/WorkoutDetails";
 import WorkoutForm from "../components/WorkoutForm";
@@ -13,7 +14,6 @@ function Home(props) {
 
       if (response.ok) {
          dispatch({type:'SET_WORKOUTS', payload:json})
-        
       }
     };
 

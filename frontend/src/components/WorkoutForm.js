@@ -1,3 +1,4 @@
+import React from "react";
 import { useReducer } from "react";
 import useWorkoutContext from "../hooks/useWorkoutContext";
 

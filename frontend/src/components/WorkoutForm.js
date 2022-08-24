@@ -1,5 +1,6 @@
 import React from "react";
 import { useReducer } from "react";
+import useAuthContext from "../hooks/useAuthContext";
 import useWorkoutContext from "../hooks/useWorkoutContext";
 
 const initialState = {
@@ -38,12 +39,22 @@ const reducer = (state, action) => {
 
 function WorkoutForm(props) {
   const { dispatch } = useWorkoutContext();
-  
+  const { user } = useAuthContext();
+
   const [state, localDispatch] = useReducer(reducer, initialState);
   const { title, load, reps, error, emptyFields } = state;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!user) {
+      localDispatch({
+        type: "error",
+        error: "You Must Be Logged In",
+      });
+      return;
+    }
+
     const workout = { title, load, reps };
 
     const response = await fetch("/api/workouts", {
@@ -51,6 +62,7 @@ function WorkoutForm(props) {
       body: JSON.stringify(workout),
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${user.token}`,
       },
     });
 

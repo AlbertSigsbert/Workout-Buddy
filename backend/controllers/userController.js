@@ -1,8 +1,8 @@
 const User = require("../models/User");
 const jwt = require('jsonwebtoken');
 
-const createToken = (id) => {
-      return jwt.sign({id}, process.env.SECRET, { expiresIn: '24h'})
+const createToken = (_id) => {
+      return jwt.sign({_id}, process.env.SECRET, { expiresIn: '24h'})
 }
 
 //login controller
